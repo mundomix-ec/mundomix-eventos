@@ -502,9 +502,11 @@
     min-height: 100px;
   }
   .cl-cell:hover { border-color: var(--gold); }
-  .cl-cell img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; cursor: zoom-in; border-radius: 5px; transition: transform 0.4s; }
+  .cl-cell img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; cursor: zoom-in; border-radius: 5px; transition: transform 0.4s; z-index: 1; }
   .cl-cell:hover img { transform: scale(1.04); }
-  .cl-cell input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; z-index: 2; }
+  /* Input solo cuando la celda está vacía */
+  .cl-cell:not(.has-img) input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; z-index: 2; }
+  .cl-cell.has-img input[type="file"] { display: none; }
   .cl-hint { font-size: 1.4rem; opacity: 0.25; pointer-events: none; z-index: 1; }
   .cl-cell.has-img .cl-hint { display: none; }
 
@@ -794,15 +796,15 @@
   <div class="collage-group" data-cat="masivo">
     <div class="collage-label">Masivos</div>
     <div class="collage masivo-layout">
-           <div class="cl-cell cl-big"   data-slot="masivo-0"><img src="masivo1.jpeg" alt="Evento masivo" style="width:100%; height:100%; object-fit:cover;"></div>
-      <div class="cl-cell cl-med"   data-slot="masivo-1"><img src="masivo2.jpeg" alt="Evento masivo" style="width:100%; height:100%; object-fit:cover;"></div>
-      <div class="cl-cell cl-med"   data-slot="masivo-2"><img src="masivo3.jpeg" alt="Evento masivo" style="width:100%; height:100%; object-fit:cover;"></div>
-      <div class="cl-cell cl-small" data-slot="masivo-4"><img src="masivo5.JPG" alt="Evento masivo" style="width:100%; height:100%; object-fit:cover;"></div>
-      <div class="cl-cell cl-small" data-slot="masivo-5"><img src="masivo6.jpeg" alt="Evento masivo" style="width:100%; height:100%; object-fit:cover;"></div>
-      <div class="cl-cell cl-med"   data-slot="masivo-6"><img src="masivo7.jpeg" alt="Evento masivo" style="width:100%; height:100%; object-fit:cover;"></div>
-      <div class="cl-cell cl-small" data-slot="masivo-7"><img src="masivo8.JPG" alt="Evento masivo" style="width:100%; height:100%; object-fit:cover;"></div>
-      <div class="cl-cell cl-small" data-slot="masivo-8"><img src="masivo1.jpeg" alt="Evento masivo" style="width:100%; height:100%; object-fit:cover;"></div>
-      <div class="cl-cell cl-small" data-slot="masivo-8"><img src="masivo9.jpeg" alt="Evento masivo" style="width:100%; height:100%; object-fit:cover;"></div> 
+      <div class="cl-cell cl-big"   data-slot="masivo-0"><input type="file" accept="image/*" onchange="loadCollage(this)"><div class="cl-hint">📸</div></div>
+      <div class="cl-cell cl-med"   data-slot="masivo-1"><input type="file" accept="image/*" onchange="loadCollage(this)"><div class="cl-hint">📸</div></div>
+      <div class="cl-cell cl-med"   data-slot="masivo-2"><input type="file" accept="image/*" onchange="loadCollage(this)"><div class="cl-hint">📸</div></div>
+      <div class="cl-cell cl-small" data-slot="masivo-3"><input type="file" accept="image/*" onchange="loadCollage(this)"><div class="cl-hint">📸</div></div>
+      <div class="cl-cell cl-small" data-slot="masivo-4"><input type="file" accept="image/*" onchange="loadCollage(this)"><div class="cl-hint">📸</div></div>
+      <div class="cl-cell cl-small" data-slot="masivo-5"><input type="file" accept="image/*" onchange="loadCollage(this)"><div class="cl-hint">📸</div></div>
+      <div class="cl-cell cl-med"   data-slot="masivo-6"><input type="file" accept="image/*" onchange="loadCollage(this)"><div class="cl-hint">📸</div></div>
+      <div class="cl-cell cl-small" data-slot="masivo-7"><input type="file" accept="image/*" onchange="loadCollage(this)"><div class="cl-hint">📸</div></div>
+      <div class="cl-cell cl-small" data-slot="masivo-8"><input type="file" accept="image/*" onchange="loadCollage(this)"><div class="cl-hint">📸</div></div>
     </div>
   </div>
 
@@ -1115,25 +1117,14 @@
     reader.onload = function(e) {
       const cell = input.closest('.cl-cell');
       cell.innerHTML = '';
+      cell.classList.add('has-img');
       const img = document.createElement('img');
       img.src = e.target.result;
       const lbIdx = lightboxImages.length;
       lightboxImages.push(e.target.result);
-      // Botón de cambiar foto (esquina)
-      const changeBtn = document.createElement('label');
-      changeBtn.title = 'Cambiar foto';
-      changeBtn.style.cssText = 'position:absolute;top:6px;right:6px;z-index:3;background:rgba(0,0,0,0.55);color:white;font-size:11px;padding:3px 8px;border-radius:20px;cursor:pointer;backdrop-filter:blur(4px);';
-      changeBtn.textContent = '✎ cambiar';
-      const newInput = document.createElement('input');
-      newInput.type = 'file'; newInput.accept = 'image/*';
-      newInput.style.display = 'none';
-      newInput.onchange = function() { loadCollage(this); };
-      changeBtn.appendChild(newInput);
-      // Clic en imagen abre lightbox
-      img.addEventListener('click', () => openLightbox(lbIdx));
-      cell.classList.add('has-img');
+      // Toda la celda abre lightbox
+      cell.addEventListener('click', () => openLightbox(lbIdx));
       cell.appendChild(img);
-      cell.appendChild(changeBtn);
     };
     reader.readAsDataURL(input.files[0]);
   }
